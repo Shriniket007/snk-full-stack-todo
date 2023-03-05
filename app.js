@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
 require('dotenv').config();
+const PORT = process.env.PORT || 3000;
 
 
 const app = express();
@@ -12,7 +13,21 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true});
+// mongoose.connect(process.env.MONGO_URL, {useNewUrlParser: true});
+
+
+
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URL);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
+}
+
+
 
 const itemsSchema = {
   name: String
@@ -156,6 +171,13 @@ app.get("/about", function(req, res){
   res.render("about");
 });
 
-app.listen(process.env.PORT || 3000, function() {
-  console.log("Server started on port 3000");
-});
+// app.listen(PORT, function() {
+//   console.log("Server started on port 3000");
+// });
+
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+      console.log("listening for requests");
+  })
+})
